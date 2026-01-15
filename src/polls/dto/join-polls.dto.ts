@@ -1,0 +1,12 @@
+import { Length, IsString } from 'class-validator';
+
+export class JoinPollDto {
+  @IsString()
+  @Length(6, 6)
+  pollID: string;         
+  
+  
+  @IsString()
+  @Length(1, 15)
+  name: string;           
+}
