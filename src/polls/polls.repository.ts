@@ -9,4 +9,8 @@ export class pollsRepository {
         configservice:ConfigService,
         @Inject(IORedisKey) private readonly redisClient:Redis
     ){}
+
+
+
+    
 }
