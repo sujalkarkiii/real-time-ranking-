@@ -4,6 +4,8 @@ import IORedis, { Redis, RedisOptions } from 'ioredis';
 
 export const IORedisKey = 'IORedis';
 
+
+// type RedisModuleOptions and type RedisAsyncModuleOptions this are just frames/blueprint that can be used to define 
 type RedisModuleOptions = {
   connectionOptions: RedisOptions;
   onClientReady?: (client: Redis) => void;
@@ -16,6 +18,10 @@ type RedisAsyncModuleOptions = {
 } & Pick<ModuleMetadata, 'imports'> &
   Pick<FactoryProvider, 'inject'>;
 
+
+
+
+
 @Module({})
 export class RedisModule {
   static async registerAsync({
@@ -23,6 +29,9 @@ export class RedisModule {
     imports,
     inject,
   }: RedisAsyncModuleOptions): Promise<DynamicModule> {
+    
+    
+    
     const redisProvider = {
       provide: IORedisKey,
       useFactory: async (...args) => {
@@ -35,6 +44,8 @@ export class RedisModule {
       },
       inject,
     };
+
+
 
     return {
       module: RedisModule,
@@ -49,4 +60,14 @@ export class RedisModule {
 
 allows users to configure Redis asynchronously (e.g., using config service
  or env variables) and inject the Redis client anywhere in the app.
-*/
+
+
+@Module({})
+export class RedisModule {
+  static async registerAsync(options: RedisAsyncModuleOptions): Promise<DynamicModule> { ... }
+}
+here options include 
+   ->> useFactory,
+   ->> imports,
+   ->> inject,
+ */

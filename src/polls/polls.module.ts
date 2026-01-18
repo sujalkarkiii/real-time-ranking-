@@ -1,10 +1,14 @@
 import { Module } from '@nestjs/common';
 import { PollsService } from './polls.service';
 import { PollsController } from './polls.controller';
+import { pollsRepository } from './polls.repository';
+import { jwtModule, redisModule } from 'src/modules.config';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
+  imports:[ConfigService,redisModule,jwtModule],
   controllers: [PollsController],
-  providers: [PollsService],
+  providers: [PollsService,pollsRepository],
 })
 export class PollsModule {}
 
