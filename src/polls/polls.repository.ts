@@ -31,7 +31,10 @@ export class pollsRepository {
             adminID: userID,
             hasStarted: false,
         };
+
+
         const key = `polls:${pollID}`;
+        
         try {
             await this.redisClient
                 .multi([
@@ -41,6 +44,9 @@ export class pollsRepository {
                 .exec();
             return initialPoll;
         }
+
+
+
         catch (e) {
             this.logger.error(
                 `Failed to add poll ${JSON.stringify(initialPoll)}\n${e}`,

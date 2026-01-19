@@ -1,32 +1,39 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import {CreatePollFields,JoinPollFields,RejoinPollFields} from "./types"
+import { CreatePollFields, JoinPollFields, RejoinPollFields } from "./types"
 import { pollsRepository } from './polls.repository';
 import { createPollID, createUserID } from 'src/ids';
 @Injectable()
 export class PollsService {
-constructor (private readonly pollsrepo: pollsRepository,
-    private readonly jwtservice:JwtService){}
+    constructor(private readonly pollsrepo: pollsRepository,
+        private readonly jwtservice: JwtService) { }
 
-create(field:CreatePollFields)
-{
-        const pollid=createPollID();
-        const userid=createUserID()
+    async create(field: CreatePollFields) {
+        const pollID = createPollID();
+        const userID = createUserID()
 
-        const createpolldata= await this.pollsrepo. ({
-            ...field,pollid,userid
-        })
-// creating signin payload
-
-const signedindata=this.jwtservice.sign(
-    {
+        const createdPoll = await this.pollsrepo.createPOll({
+            ...field,
+            pollID,
+            userID,
+        });
 
 
+        // creating signin payload
 
-
+        const signedindata = this.jwtservice.sign(
+            {
+                pollID: createdPoll.id,
+                name: field.name,
+            },
+            {
+                subject: userID,
+            },
+        )
+        return {
+             poll: createdPoll,
+      accessToken: signedindata,
+        }
     }
-)
-    return data
-}
 
 }
