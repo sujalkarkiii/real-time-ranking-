@@ -14,3 +14,10 @@ export type RejoinPollFields = {
   userID: string;
   name: string;
 };
+
+export type CreatePollData = {
+  pollID: string;
+  topic: string;
+  votesPerVoter: number;
+  userID: string;
+};
