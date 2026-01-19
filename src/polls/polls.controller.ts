@@ -12,9 +12,11 @@ export class PollsController {
     }   
 
 
+
+    
     @Post('/join')
     join(@Body() joinpolldto:JoinPollDto){
-      return "this will create for join"
+      return this.pollsService.join(joinpolldto)
     }    
 
 

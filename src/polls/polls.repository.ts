@@ -1,4 +1,4 @@
-import { Inject, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import Redis from "ioredis";
 import { IORedisKey } from "src/redis.module";
@@ -34,7 +34,7 @@ export class pollsRepository {
 
 
         const key = `polls:${pollID}`;
-        
+
         try {
             await this.redisClient
                 .multi([
@@ -53,9 +53,55 @@ export class pollsRepository {
             );
             throw new InternalServerErrorException();
         }
-
-
-
-
     }
+
+
+    async joinpoll(pollId: string): Promise<Poll> {
+        const key = `polls:${pollId}`
+
+        try {
+
+            // getting the data from the redis and passing to polldata
+            const pollData = await this.redisClient.send_command('JSON.GET', key, '.');
+
+        } catch (e) {
+            this.logger.error(`Failed to get pollID ${pollId}: ${e.message}`, e.stack);
+
+        }
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
