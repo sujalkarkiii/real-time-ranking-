@@ -55,20 +55,19 @@ export class pollsRepository {
         }
     }
 
-
     async joinpoll(pollId: string): Promise<Poll> {
-        const key = `polls:${pollId}`
+
+        const key = `polls:${pollId}`;
 
         try {
-
-            // getting the data from the redis and passing to polldata
-            const pollData = await this.redisClient.send_command('JSON.GET', key, '.');
-
+        const currentPoll = await this.redisClient.sendCommand(['JSON.GET','key','.'])
+            return JSON.parse(currentPoll)
         } catch (e) {
             this.logger.error(`Failed to get pollID ${pollId}: ${e.message}`, e.stack);
-
+            throw new InternalServerErrorException(`Failed to get pollID ${pollId}`);
         }
     }
+
 
 }
 

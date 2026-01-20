@@ -23,6 +23,8 @@ export type Results = Array<{
     score: number,
 }>;
 
+
+
 export type Poll = {
     id: string;
     topic: string;

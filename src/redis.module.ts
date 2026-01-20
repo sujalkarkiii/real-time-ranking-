@@ -12,40 +12,28 @@ type RedisModuleOptions = {
 };
 
 type RedisAsyncModuleOptions = {
-  useFactory: (
-    ...args: any[]    //...args:any[]  accepts anynumber of argument as an array of any type
-  ) => Promise<RedisModuleOptions> | RedisModuleOptions;
-} & Pick<ModuleMetadata, 'imports'> &
-  Pick<FactoryProvider, 'inject'>;
-
-
-
+  useFactory: (...args: any[]) => Promise<RedisModuleOptions> | RedisModuleOptions;
+  inject?: any[];
+  imports?: any[];
+}
 
 
 @Module({})
 export class RedisModule {
-  static async registerAsync({
-    useFactory,
-    imports,
-    inject,
-  }: RedisAsyncModuleOptions): Promise<DynamicModule> {
-    
-    
-    
+  static async registerAsync({ useFactory, imports, inject }: RedisAsyncModuleOptions): Promise<DynamicModule> {
+
     const redisProvider = {
       provide: IORedisKey,
       useFactory: async (...args) => {
         const { connectionOptions, onClientReady } = await useFactory(...args);
-
         const client = await new IORedis(connectionOptions);
-        onClientReady(client);
+
+        onClientReady?.(client);;
 
         return client;
       },
-      inject,
+      inject
     };
-
-
 
     return {
       module: RedisModule,
@@ -56,18 +44,3 @@ export class RedisModule {
   }
 }
 
-/*
-
-allows users to configure Redis asynchronously (e.g., using config service
- or env variables) and inject the Redis client anywhere in the app.
-
-
-@Module({})
-export class RedisModule {
-  static async registerAsync(options: RedisAsyncModuleOptions): Promise<DynamicModule> { ... }
-}
-here options include 
-   ->> useFactory,
-   ->> imports,
-   ->> inject,
- */
