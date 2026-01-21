@@ -55,13 +55,17 @@ export class pollsRepository {
         }
     }
 
+
+
+    
     async joinpoll(pollId: string): Promise<Poll> {
 
         const key = `polls:${pollId}`;
 
         try {
         const currentPoll = await this.redisClient.sendCommand(['JSON.GET','key','.'])
-            return JSON.parse(currentPoll)
+
+            return JSON.parse(currentPoll);
         } catch (e) {
             this.logger.error(`Failed to get pollID ${pollId}: ${e.message}`, e.stack);
             throw new InternalServerErrorException(`Failed to get pollID ${pollId}`);

@@ -1,3 +1,4 @@
+import { Request } from 'express';
 export type CreatePollFields = {
   topic: string;
   votesPerVoter: number;
@@ -21,3 +22,10 @@ export type CreatePollData = {
   votesPerVoter: number;
   userID: string;
 };
+
+export type AuthPayload = {
+  userID: string;
+  pollID: string;
+  name: string;
+};
+export type RequestWithAuth = Request & AuthPayload;

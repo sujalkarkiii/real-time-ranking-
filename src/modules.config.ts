@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisModule } from './redis.module';
 import { JwtModule } from '@nestjs/jwt';
 
-export const redis = RedisModule.registerAsync({
+export const redisModule = RedisModule.registerAsync({
   imports: [ConfigModule],
   useFactory: async (configServic: ConfigService) => {
     return {

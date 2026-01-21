@@ -1,29 +1,40 @@
-import { Body, Controller, Logger, Post } from '@nestjs/common';
+import { Body, Controller, Logger, Post, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { PollsService } from './polls.service';
 import { CreatePollDto } from './dto/create-polls.dto';
 import { JoinPollDto } from './dto/join-polls.dto';
+import { ControllerAuthGuard } from './controller-auth.guard';
+import { RequestWithAuth } from './types';
 
+
+@UsePipes(new ValidationPipe())
 @Controller('polls')
 export class PollsController {
-  constructor(private readonly pollsService: PollsService) {}
-    @Post()
-    create( @Body() createpolldto:CreatePollDto){
-       return this.pollsService.create(createpolldto)
-    }   
+  constructor(private readonly pollsService: PollsService) { }
+  @Post()
+  create(@Body() createpolldto: CreatePollDto) {
+    return this.pollsService.create(createpolldto)
+  }
 
 
 
-    
-    @Post('/join')
-    join(@Body() joinpolldto:JoinPollDto){
-      return this.pollsService.join(joinpolldto)
-    }    
 
+  @Post('/join')
+  join(@Body() joinpolldto: JoinPollDto) {
+    return this.pollsService.join(joinpolldto)
+  }
 
-    @Post('/rejoin')
-    rejoin(){
-      return "this will create for rejoin"
-    }
+  @UseGuards(ControllerAuthGuard)
+  @Post('/rejoin')
+  rejoin(@Req() request: RequestWithAuth) {
+    const { userID, pollID, name } = request;
+    const result = this.pollsService.rejoinPoll({
+      name,
+      pollID,
+      userID,
+    });
+
+    return result;
+  }
 
 }
 

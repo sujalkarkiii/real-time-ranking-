@@ -57,9 +57,12 @@ export class PollsService {
         return{
             poll:joinedpoll,
             accessToken:signedString
+        }}
+
+
+
+        rejoinPoll(data){
+
         }
-
-
-    }
 
 }
