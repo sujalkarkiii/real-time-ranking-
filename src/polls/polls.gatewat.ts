@@ -9,8 +9,8 @@ import { Namespace } from "socket.io";
 @WebSocketGateway({ namespace: 'polls' })
 export class websocket implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
-
-  constructor(private readonly logger = new Logger(websocket.name), pollsService: PollsService) { }
+ logger = new Logger(websocket.name)
+  constructor(private readonly pollsService: PollsService) { }
   @WebSocketServer() io:Namespace
   // server:Server  for all clients in all namespace
 

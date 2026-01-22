@@ -1,13 +1,14 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable, Logger } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { Observable } from "rxjs";
 import { RequestWithAuth } from "./types";
 
 @Injectable()
 export class ControllerAuthGuard implements CanActivate{
 
-constructor (private readonly jwtservice:JwtService){}
 
+  
+private readonly logger=new Logger(ControllerAuthGuard.name)
+constructor (private  readonly jwtservice:JwtService){}
 
 
 
@@ -16,9 +17,10 @@ canActivate(context: ExecutionContext): boolean  {
   
 
  const request: RequestWithAuth = context.switchToHttp().getRequest();
- 
+ this.logger.debug(`checking for auth token on request body`,request.body)
  
  const { accessToken } = request.body;
+
       try {
       const payload = this.jwtservice.verify(accessToken);
       // append user and poll to socket
