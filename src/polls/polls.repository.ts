@@ -2,8 +2,9 @@ import { BadRequestException, Inject, Injectable, InternalServerErrorException, 
 import { ConfigService } from "@nestjs/config";
 import Redis from "ioredis";
 import { IORedisKey } from "src/redis.module";
-import { CreatePollData } from "./types";
+import { AddParticipantData, CreatePollData } from "./types";
 import { Poll } from "shared/polls-types";
+import { promises } from "dns";
 
 
 @Injectable()
@@ -57,7 +58,7 @@ export class pollsRepository {
 
 
 
-    
+
     async joinpoll(pollId: string): Promise<Poll> {
 
         const key = `polls:${pollId}`;
@@ -68,7 +69,7 @@ export class pollsRepository {
 
             return JSON.parse(currentPoll as string);
 
-            
+
         } catch (e) {
             this.logger.error(`Failed to get pollID ${pollId}: ${e.message}`, e.stack);
             throw new InternalServerErrorException(`Failed to get pollID ${pollId}`);
@@ -76,10 +77,40 @@ export class pollsRepository {
     }
 
 
+    async addparticipent({
+        pollID,
+        userID,
+        name,
+    }: AddParticipantData): Promise<Poll> {
+        const key = `polls:${pollID}`;
+        const participentId = `pariticipentid.${userID}`
+        try {
+            const currentPoll = await this.redisClient.call('JSON.GET', key, participentId, JSON.stringify(name))
+            return JSON.parse(currentPoll as string);
+        } catch (e) {
+            this.logger.error(`Failed to add participant to poll ${pollID}: ${e.message}`, e.stack)
+            throw new InternalServerErrorException(`Failed to add participant to poll ${pollID}`)
+        }
+    }
+
+    async removeParticipant(pollID: string, userID: string): Promise<Poll> {
+        const key = `polls:${pollID}`;
+        const participentId = `pariticipentid.${userID}`
+
+        try {
+
+            await this.redisClient.call('JSON.DEl', key, participentId);
+            
+      return this.joinpoll(pollID); 
+        } catch (e) {
+            this.logger.error(`Failed to remove participant ${userID} from poll ${pollID}: ${e.message}`, e.stack)
+            throw new InternalServerErrorException(`Failed to remove participant from poll`)
+        }
+    }
+
+
+
 }
-
-
-
 
 
 

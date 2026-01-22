@@ -5,8 +5,13 @@ import { RequestWithAuth } from "./types";
 
 @Injectable()
 export class ControllerAuthGuard implements CanActivate{
-    constructor (private readonly jwtservice:JwtService){}
-canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+
+constructor (private readonly jwtservice:JwtService){}
+
+
+
+
+canActivate(context: ExecutionContext): boolean  {
   
   
 
@@ -29,3 +34,14 @@ canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<
     
 }
 }
+
+
+
+// without canactivaete guard cannt inspect the reqest guards cannot run automatically without this method, beause 
+// nestjs calls canactivate to decide whether to allow the request
+
+
+
+// canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+// used to give acces to the guardroute
+// without using this => it will allow access to all route

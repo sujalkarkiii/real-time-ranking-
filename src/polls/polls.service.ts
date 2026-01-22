@@ -41,28 +41,29 @@ export class PollsService {
     async join(field: JoinPollFields) {
 
         const userId = createUserID()
-        const joinedpoll= await this.pollsrepo.joinpoll(field.pollID)
+        const joinedpoll = await this.pollsrepo.joinpoll(field.pollID)
 
 
 
-    const signedString = this.jwtservice.sign(
-      {
-        pollID: joinedpoll.id,
-        name: field.name,
-      },
-      {
-        subject: userId,
-      },
-    );
-        return{
-            poll:joinedpoll,
-            accessToken:signedString
-        }}
-
-
-
-        rejoinPoll(data){
-
+        const signedString = this.jwtservice.sign(
+            {
+                pollID: joinedpoll.id,
+                name: field.name,
+            },
+            {
+                subject: userId,
+            },
+        );
+        return {
+            poll: joinedpoll,
+            accessToken: signedString
         }
+    }
+
+
+
+    async rejoinPoll(fields: RejoinPollFields) {
+        const joinedPoll = await this.pollsrepo.addparticipent(fields);
+    }
 
 }

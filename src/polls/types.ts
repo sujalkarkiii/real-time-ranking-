@@ -23,6 +23,12 @@ export type CreatePollData = {
   userID: string;
 };
 
+
+export type AddParticipantData = {
+  pollID: string;
+  userID: string;
+  name: string;
+};
 export type AuthPayload = {
   userID: string;
   pollID: string;
