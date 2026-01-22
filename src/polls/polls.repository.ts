@@ -63,9 +63,12 @@ export class pollsRepository {
         const key = `polls:${pollId}`;
 
         try {
-        const currentPoll = await this.redisClient.sendCommand(['JSON.GET','key','.'])
 
-            return JSON.parse(currentPoll);
+            const currentPoll = await this.redisClient.call('JSON.GET', key, '.')
+
+            return JSON.parse(currentPoll as string);
+
+            
         } catch (e) {
             this.logger.error(`Failed to get pollID ${pollId}: ${e.message}`, e.stack);
             throw new InternalServerErrorException(`Failed to get pollID ${pollId}`);

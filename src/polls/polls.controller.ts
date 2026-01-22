@@ -3,7 +3,7 @@ import { PollsService } from './polls.service';
 import { CreatePollDto } from './dto/create-polls.dto';
 import { JoinPollDto } from './dto/join-polls.dto';
 import { ControllerAuthGuard } from './controller-auth.guard';
-import { RequestWithAuth } from './types';
+import type { RequestWithAuth } from './types';
 
 
 @UsePipes(new ValidationPipe())
