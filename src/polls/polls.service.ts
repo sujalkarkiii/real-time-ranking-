@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { CreatePollFields, JoinPollFields, RejoinPollFields } from "./types"
 import { pollsRepository } from './polls.repository';
@@ -6,10 +6,14 @@ import { createPollID, createUserID } from 'src/ids';
 
 @Injectable()
 export class PollsService {
+    private readonly logger= new Logger(PollsService.name)
     constructor(private readonly pollsrepo: pollsRepository,
         private readonly jwtservice: JwtService) { }
 
-    async create(field: CreatePollFields) {
+
+// this function is for creating the polls to vote//
+
+async create(field: CreatePollFields) {
         const pollID = createPollID();
         const userID = createUserID()
 
@@ -18,8 +22,7 @@ export class PollsService {
             pollID,
             userID,
         });
-
-
+        this.logger.log(field)
         // creating signin payload
 
         const signedindata = this.jwtservice.sign(
@@ -36,6 +39,7 @@ export class PollsService {
             accessToken: signedindata,
         }
     }
+//function for creating the polls to vote ends here//
 
 
     async join(field: JoinPollFields) {
@@ -43,7 +47,7 @@ export class PollsService {
         const userId = createUserID()
         const joinedpoll = await this.pollsrepo.joinpoll(field.pollID)
 
-
+        this.logger.log(userId)
 
         const signedString = this.jwtservice.sign(
             {

@@ -7,7 +7,7 @@ import type { RequestWithAuth } from './types';
 
 
 @UsePipes(new ValidationPipe())
-@Controller('polls')
+@Controller('/polls')
 export class PollsController {
   constructor(private readonly pollsService: PollsService) { }
   @Post()
@@ -17,7 +17,7 @@ export class PollsController {
 
 
 
-
+  
   @Post('/join')
   join(@Body() joinpolldto: JoinPollDto) {
     return this.pollsService.join(joinpolldto)
@@ -37,16 +37,3 @@ export class PollsController {
   }
 
 }
-
-
-
-
-// ... is a spread opearator=>
-/*
-      const arr1 = [1, 2, 3];
-      const arr2 = [...arr1, 4, 5];
-      [1, 2, 3, 4, 5]
-
-
-        
- */

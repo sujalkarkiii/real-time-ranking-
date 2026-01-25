@@ -20,6 +20,7 @@ export class pollsRepository {
         this.ttl = configservice.get('POLL_DURATION', '3600');
     }
 
+
     async createPOll({ votesPerVoter, topic, pollID, userID }: CreatePollData): Promise<Poll> {
         const initialPoll = {
             id: pollID,
@@ -38,10 +39,9 @@ export class pollsRepository {
 
         try {
             await this.redisClient
-                .multi([
-                    ['send_command', 'JSON.SET', key, '.', JSON.stringify(initialPoll)],
-                    ['expire', key, this.ttl],
-                ])
+                .multi()
+                .set(key, JSON.stringify(initialPoll))
+                .expire(key, this.ttl)
                 .exec();
             return initialPoll;
         }
@@ -65,9 +65,11 @@ export class pollsRepository {
 
         try {
 
-            const currentPoll = await this.redisClient.call('JSON.GET', key, '.')
+           const currentPollString = await this.redisClient.get(key)
+           if(!currentPollString){
+                    this.logger.error('Redis key not found:', key);           }
 
-            return JSON.parse(currentPoll as string);
+            return JSON.parse(currentPollString as string);
 
 
         } catch (e) {
@@ -85,13 +87,14 @@ export class pollsRepository {
         const key = `polls:${pollID}`;
         const participentId = `pariticipentid.${userID}`
         try {
-            const currentPoll = await this.redisClient.call('JSON.GET', key, participentId, JSON.stringify(name))
+            const currentPoll = await this.redisClient.get(key)
             return JSON.parse(currentPoll as string);
         } catch (e) {
             this.logger.error(`Failed to add participant to poll ${pollID}: ${e.message}`, e.stack)
             throw new InternalServerErrorException(`Failed to add participant to poll ${pollID}`)
         }
     }
+
 
     async removeParticipant(pollID: string, userID: string): Promise<Poll> {
         const key = `polls:${pollID}`;
@@ -100,8 +103,8 @@ export class pollsRepository {
         try {
 
             await this.redisClient.call('JSON.DEl', key, participentId);
-            
-      return this.joinpoll(pollID); 
+
+            return this.joinpoll(pollID);
         } catch (e) {
             this.logger.error(`Failed to remove participant ${userID} from poll ${pollID}: ${e.message}`, e.stack)
             throw new InternalServerErrorException(`Failed to remove participant from poll`)
