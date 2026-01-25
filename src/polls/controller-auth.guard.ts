@@ -3,25 +3,21 @@ import { JwtService } from "@nestjs/jwt";
 import { RequestWithAuth } from "./types";
 
 @Injectable()
-export class ControllerAuthGuard implements CanActivate{
-
-
-  
-private readonly logger=new Logger(ControllerAuthGuard.name)
-constructor (private  readonly jwtservice:JwtService){}
+export class ControllerAuthGuard implements CanActivate {
+  private readonly logger = new Logger(ControllerAuthGuard.name)
+  constructor(private readonly jwtservice: JwtService) { }
 
 
 
-canActivate(context: ExecutionContext): boolean  {
-  
-  
+  canActivate(context: ExecutionContext): boolean {
 
- const request: RequestWithAuth = context.switchToHttp().getRequest();
- this.logger.debug(`checking for auth token on request body`,request.body)
- 
- const { accessToken } = request.body;
 
-      try {
+    const request: RequestWithAuth = context.switchToHttp().getRequest();
+    this.logger.debug(`checking for auth token on request body`, request.body)
+
+    const { accessToken } = request.body;
+
+    try {
       const payload = this.jwtservice.verify(accessToken);
       // append user and poll to socket
       request.userID = payload.sub;
@@ -32,9 +28,7 @@ canActivate(context: ExecutionContext): boolean  {
       throw new ForbiddenException('Invalid authorization token');
     }
 
-
-    
-}
+  }
 }
 
 
