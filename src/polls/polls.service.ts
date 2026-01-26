@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { CreatePollFields, JoinPollFields, RejoinPollFields } from "./types"
+import { AddParticipantData, CreatePollFields, JoinPollFields, RejoinPollFields } from "./types"
 import { pollsRepository } from './polls.repository';
 import { createPollID, createUserID } from 'src/ids';
+import { Poll } from 'shared/polls-types';
 
 @Injectable()
 export class PollsService {
@@ -57,17 +58,26 @@ async create(field: CreatePollFields) {
             {
                 subject: userId,
             },
-        );
+        )
         return {
-            poll: joinedpoll,
+             poll: joinedpoll,
             accessToken: signedString
         }
     }
 
-
+  async addParticipant(addParticipant: AddParticipantData) {
+    return this.pollsrepo.addparticipent(addParticipant)
+  }
 
     async rejoinPoll(fields: RejoinPollFields) {
         const joinedPoll = await this.pollsrepo.addparticipent(fields);
+        return joinedPoll
     }
+
+    async startpoll(fields: RejoinPollFields) {
+        const joinedPoll = await this.pollsrepo.addparticipent(fields);
+        return joinedPoll
+    }
+
 
 }
