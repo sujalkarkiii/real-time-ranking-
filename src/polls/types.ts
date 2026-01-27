@@ -29,6 +29,22 @@ export type AddParticipantData = {
   userID: string;
   name: string;
 };
+
+export type AddParticipantRankingsData = {
+  pollID: string;
+  userID: string;
+  nomination: string;
+  name:string
+};
+
+export type SubmitRankingsFields = {
+  pollID: string;
+  userID: string;
+  name:string
+  nomination: string;
+};
+
+
 export type AuthPayload = {
   userID: string;
   pollID: string;

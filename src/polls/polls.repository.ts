@@ -1,8 +1,8 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import Redis from "ioredis";
 import { IORedisKey } from "src/redis.module";
-import { AddParticipantData, CreatePollData } from "./types";
+import { AddParticipantData, AddParticipantRankingsData, CreatePollData } from "./types";
 import { Poll } from "shared/polls-types";
 import { promises } from "dns";
 
@@ -26,9 +26,9 @@ export class pollsRepository {
             id: pollID,
             topic,
             votesPerVoter,
-            participants: {},
-            nominations: {},
-            rankings: {},
+            participants: {},               // {userid:"" , username:""}  
+            nominations: [],              //    x,y,z to tick what to vote
+            rankings: {},                 //x= 6, y=2  votes aayo bhan na
             results: [],
             adminID: userID,
             hasStarted: false,
@@ -50,7 +50,7 @@ export class pollsRepository {
 
         catch (e) {
             this.logger.error(
-                `Failed to add poll ${JSON.stringify(initialPoll)}\n${e}`,
+                `Failed to add poll ${JSON.stringify(initialPoll)}${e}`,
             );
             throw new InternalServerErrorException();
         }
@@ -58,16 +58,17 @@ export class pollsRepository {
 
 
 
-
+    // ===getpoll
     async joinpoll(pollId: string): Promise<Poll> {
 
         const key = `polls:${pollId}`;
 
         try {
 
-           const currentPollString = await this.redisClient.get(key)
-           if(!currentPollString){
-                    this.logger.error('Redis key not found:', key);           }
+            const currentPollString = await this.redisClient.get(key)
+            if (!currentPollString) {
+                this.logger.error('Redis key not found:', key);
+            }
 
             return JSON.parse(currentPollString as string);
 
@@ -79,6 +80,69 @@ export class pollsRepository {
     }
 
 
+    // here logic of voters comes under this seciton
+    async addParticipantRankings({
+        pollID,
+        userID,
+        nomination,
+        name
+    }: AddParticipantRankingsData): Promise<Poll> {
+        this.logger.log(
+            `Attempting to add rankings for userID: ${userID} to pollID: ${pollID}`,
+            nomination,
+        );
+
+        const key = `polls:${pollID}`;
+
+        try {
+
+            const currentPollString = await this.redisClient.get(key);
+
+            if (!currentPollString) {
+                throw new NotFoundException(`Poll with ID ${pollID} not found`);
+            }
+            const poll: Poll = JSON.parse(currentPollString as string);
+
+            if (poll.hasStarted == false) {
+                throw new BadRequestException('Participants cannot rank until the poll has started')
+            }
+
+
+            if (poll.participants[userID]) {
+                throw new BadRequestException(`User ${userID} has already joined the poll`);
+            } else {
+                poll.participants[userID] = name;
+            }
+            poll.nominations.push(nomination)
+
+            await this.redisClient.set(key, JSON.stringify(poll));
+
+            return poll;
+        } catch (e) {
+            this.logger.error(
+                `Failed to add rankings for userID: ${userID} in pollID: ${pollID}`,
+                e.stack,
+            );
+            throw new InternalServerErrorException(
+                'There was an error saving participant rankings',
+            );
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Function comminng under admin section started
     async addparticipent({
         pollID,
         userID,
@@ -94,8 +158,6 @@ export class pollsRepository {
             throw new InternalServerErrorException(`Failed to add participant to poll ${pollID}`)
         }
     }
-
-
     async removeParticipant(pollID: string, userID: string): Promise<Poll> {
         const key = `polls:${pollID}`;
         const participentId = `pariticipentid.${userID}`
@@ -113,7 +175,91 @@ export class pollsRepository {
 
 
 
+
+    async starpoll(pollID: string): Promise<Poll> {
+
+        const key = `polls:${pollID}`;
+
+        try {
+            const pollString = await this.redisClient.get(key);
+
+            if (!pollString) {
+                throw new Error('Poll not found');
+            }
+
+
+            const poll: Poll = JSON.parse(pollString);
+            poll.hasStarted = true
+            await this.redisClient.set(key, JSON.stringify(poll));
+
+            return poll;
+
+
+
+
+        } catch (e) {
+            this.logger.error(`Failed to start poll ${pollID}: ${e.message}`, e.stack);
+            throw new InternalServerErrorException(`Failed to start poll ${pollID}`);
+        }
+    }
+
+
+
+
+
+
+
+
+
+    //function under admin server ended
+
+
+
+
+
+
+
+
+
+
+
+
+    // async getresult(pollID: string): Promise<number> {
+
+    //     const key = `polls:${pollID}`;
+    //     try {
+
+    //         const total_vote = await this.redisClient.get(key)
+    //         if (!total_vote) {
+    //             throw new NotFoundException(`Poll ${pollID} not found`);
+    //         }
+    //         const poll: Poll = JSON.parse(total_vote as string);
+    //         poll.nominations.forEach(ele => {
+    //             poll.rankings[ele] = (poll.rankings[ele] || 0) + 1;
+    //         });
+
+
+
+
+
+
+
+    //     } catch {
+    //         this.logger.error(`Failed to get result for poll ${pollID}`, e.stack);
+    //         throw new InternalServerErrorException(`Error getting poll result`);
+    //     }
+    // }
+
 }
+
+
+
+
+
+
+
+
+
 
 
 

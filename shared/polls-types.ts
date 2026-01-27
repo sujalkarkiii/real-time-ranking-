@@ -2,24 +2,13 @@ export type Participants = {
     [participantID: string]: string;
 }
 
-export type Nomination = {
-    userID: string;
-    text: string;
-}
-
-type NominationID = string;
-
-export type Nominations = {
-    [nominationID: NominationID]: Nomination;
-}
-
+export type Nominations = string[];
 export type Rankings = {
-    [userID: string]: NominationID[];
+    [userID: string]: string[];
 };
 
 export type Results = Array<{
-    nominationID: NominationID,
-    nominationText: string,
+  nomination: string
     score: number,
 }>;
 

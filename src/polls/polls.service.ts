@@ -1,20 +1,20 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { AddParticipantData, CreatePollFields, JoinPollFields, RejoinPollFields } from "./types"
+import { AddParticipantData, CreatePollFields, JoinPollFields, RejoinPollFields, SubmitRankingsFields } from "./types"
 import { pollsRepository } from './polls.repository';
 import { createPollID, createUserID } from 'src/ids';
 import { Poll } from 'shared/polls-types';
 
 @Injectable()
 export class PollsService {
-    private readonly logger= new Logger(PollsService.name)
+    private readonly logger = new Logger(PollsService.name)
     constructor(private readonly pollsrepo: pollsRepository,
         private readonly jwtservice: JwtService) { }
 
 
-// this function is for creating the polls to vote//
+    // this function is for creating the polls to vote//
 
-async create(field: CreatePollFields) {
+    async create(field: CreatePollFields) {
         const pollID = createPollID();
         const userID = createUserID()
 
@@ -40,7 +40,7 @@ async create(field: CreatePollFields) {
             accessToken: signedindata,
         }
     }
-//function for creating the polls to vote ends here//
+    //function for creating the polls to vote ends here//
 
 
     async join(field: JoinPollFields) {
@@ -60,24 +60,77 @@ async create(field: CreatePollFields) {
             },
         )
         return {
-             poll: joinedpoll,
+            poll: joinedpoll,
             accessToken: signedString
         }
     }
 
-  async addParticipant(addParticipant: AddParticipantData) {
-    return this.pollsrepo.addparticipent(addParticipant)
+    async addParticipant(addParticipant: AddParticipantData) {
+        return this.pollsrepo.addparticipent(addParticipant)
+    }
+
+
+
+
+
+  async removeParticipant(
+    pollID: string,
+    userID: string,
+  ): Promise<Poll | void> {
+    const poll = await this.pollsrepo.joinpoll(pollID);
+
+    if (!poll.hasStarted) {
+      const updatedPoll = await this.pollsrepo.removeParticipant(
+        pollID,
+        userID,
+      );
+      return updatedPoll;
+    }
   }
+
+  async getPoll(pollID: string): Promise<Poll> {
+    return this.pollsrepo.joinpoll(pollID);
+  }
+
+
+
+
+
+
+
+
+
 
     async rejoinPoll(fields: RejoinPollFields) {
         const joinedPoll = await this.pollsrepo.addparticipent(fields);
         return joinedPoll
     }
 
-    async startpoll(fields: RejoinPollFields) {
-        const joinedPoll = await this.pollsrepo.addparticipent(fields);
+    async startpoll(pollID: string) {
+        const joinedPoll = await this.pollsrepo.starpoll(pollID);
         return joinedPoll
     }
 
 
+
+
+    async castvote(rankingData: SubmitRankingsFields) {
+        const hasPollStarted = this.pollsrepo.addParticipantRankings(rankingData)
+    }
+
+
+
+
+
+    async computeResults(pollID: string): Promise<number> {
+
+                const get_result=await this.pollsrepo.getresult(pollID)
+                this.logger.log(get_result)
+                return get_result
+
+    }
+
+    // async cancelPoll(pollID: string): Promise<void> {
+    //     await this.pollsrepo.deletePoll(pollID);
+    // }
 }
