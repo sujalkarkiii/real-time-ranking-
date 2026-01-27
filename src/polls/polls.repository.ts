@@ -224,31 +224,32 @@ export class pollsRepository {
 
 
 
-    // async getresult(pollID: string): Promise<number> {
+    async getresult(pollID: string): Promise<Poll> {
 
-    //     const key = `polls:${pollID}`;
-    //     try {
+        const key = `polls:${pollID}`;
+        try {
 
-    //         const total_vote = await this.redisClient.get(key)
-    //         if (!total_vote) {
-    //             throw new NotFoundException(`Poll ${pollID} not found`);
-    //         }
-    //         const poll: Poll = JSON.parse(total_vote as string);
-    //         poll.nominations.forEach(ele => {
-    //             poll.rankings[ele] = (poll.rankings[ele] || 0) + 1;
-    //         });
+            const total_vote = await this.redisClient.get(key)
+            if (!total_vote) {
+                throw new NotFoundException(`Poll ${pollID} not found`);
+            }
+            const poll: Poll = JSON.parse(total_vote as string);
+            poll.nominations.forEach(ele => {
+                poll.rankings[ele] = (poll.rankings[ele] || 0) + 1;
+            });
+
+            
+            await this.redisClient.del(key)
+            return poll
 
 
 
 
-
-
-
-    //     } catch {
-    //         this.logger.error(`Failed to get result for poll ${pollID}`, e.stack);
-    //         throw new InternalServerErrorException(`Error getting poll result`);
-    //     }
-    // }
+        } catch(e) {
+            this.logger.error(`Failed to get result for poll ${pollID}`, e.stack);
+            throw new InternalServerErrorException(`Error getting poll result`);
+        }
+    }
 
 }
 

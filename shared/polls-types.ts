@@ -4,7 +4,7 @@ export type Participants = {
 
 export type Nominations = string[];
 export type Rankings = {
-    [userID: string]: string[];
+    [userID: string]: number;
 };
 
 export type Results = Array<{

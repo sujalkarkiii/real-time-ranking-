@@ -4,6 +4,7 @@ import { Logger, UseGuards } from "@nestjs/common";
 import { Socket } from "socket.io";
 import { Namespace } from "socket.io";
 import { websocketguard } from "src/websocket-auth-guard";
+import { emit } from "process";
 
 
 
@@ -94,7 +95,9 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @MessageBody() data: { nomination: string },
     @ConnectedSocket() client: any,
   ): Promise<void> {
-   await this.pollsService.computeResults(client.pollID)
+   const updatedpoll =await this.pollsService.computeResults(client.pollID)
+    this.io.to(client.pollID).emit("Result",updatedpoll.results)
+
   }
 
 

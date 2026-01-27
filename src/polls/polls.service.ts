@@ -122,7 +122,7 @@ export class PollsService {
 
 
 
-    async computeResults(pollID: string): Promise<number> {
+    async computeResults(pollID: string): Promise<Poll> {
 
                 const get_result=await this.pollsrepo.getresult(pollID)
                 this.logger.log(get_result)
