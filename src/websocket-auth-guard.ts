@@ -2,6 +2,7 @@ import { CanActivate, ExecutionContext, ForbiddenException, Injectable, Logger }
 import { JwtService } from "@nestjs/jwt";
 
 @Injectable()
+
 export class websocketguard implements CanActivate {
     private readonly logger = new Logger(websocketguard.name)
     constructor(private readonly jwtservice: JwtService) { }
