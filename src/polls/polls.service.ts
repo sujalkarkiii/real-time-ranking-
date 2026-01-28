@@ -48,7 +48,6 @@ export class PollsService {
         const userId = createUserID()
         const joinedpoll = await this.pollsrepo.joinpoll(field.pollID)
 
-        this.logger.log(userId)
 
         const signedString = this.jwtservice.sign(
             {
@@ -60,6 +59,7 @@ export class PollsService {
             },
         )
         return {
+            userId:userId,
             poll: joinedpoll,
             accessToken: signedString
         }

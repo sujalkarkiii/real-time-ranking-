@@ -4,12 +4,16 @@ import { Logger, UseGuards } from "@nestjs/common";
 import { Socket } from "socket.io";
 import { Namespace } from "socket.io";
 import { websocketguard } from "src/websocket-auth-guard";
-import { emit } from "process";
 
 
 
-
-@WebSocketGateway({ namespace: 'polls' })
+@WebSocketGateway({
+  namespace: '/polls',
+  cors: {
+    origin: 'http://localhost:5173',
+    credentials: true,
+  },
+})
 @UseGuards(websocketguard)
 export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 

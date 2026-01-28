@@ -22,7 +22,7 @@ export class PollsController {
   join(@Body() joinpolldto: JoinPollDto) {
     return this.pollsService.join(joinpolldto)
   }
-
+  
   @UseGuards(ControllerAuthGuard)
   @Post('/rejoin')
   rejoin(@Req() request: RequestWithAuth) {
