@@ -18,7 +18,7 @@ export class pollsRepository {
     constructor(
         configservice: ConfigService,
         @Inject(IORedisKey) private readonly redisClient: Redis,
-        @InjectRepository(polls) private pollsrepo:Repository<polls>
+        @InjectRepository(polls) private pollsrepo: Repository<polls>
     ) {
         this.ttl = configservice.get('POLL_DURATION', '3600');
     }
@@ -255,12 +255,13 @@ export class pollsRepository {
     }
 
 
-    async addnomines(check:createnominee) {
+    async addnomines(check: createnominee) {
 
         try {
-            const {pollId,name}=check
-                const poll = this.pollsrepo.create({pollId:pollId,nominees:name})
-               return this.pollsrepo.save(poll);
+            const { pollId, name } = check
+            const poll = this.pollsrepo.create({ pollId: pollId, nominees: [name] })
+            const savedPoll = this.pollsrepo.save(poll)
+            await this.redisClient.set(`poll:${pollId}123`, JSON.stringify(savedPoll));
 
         } catch (error) {
             this.logger.error('failed to input to the database')
@@ -268,7 +269,20 @@ export class pollsRepository {
         }
     }
 
+    async sendnominee(pollID: string) {
+        const redisKey = `poll:${pollID}123`
+        const raw = await this.redisClient.get(redisKey)
+        if (!raw) {
+            return { nominees: [] };
+        }
 
+        const poll = JSON.parse(raw);
+
+        return { nominees: poll.nominees || [] };
+    } catch(error) {
+        this.logger.error('Failed to fetch nominees from Redis', error);
+        throw new BadGatewayException('Error fetching poll data');
+    }
 
 
 

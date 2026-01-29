@@ -1,4 +1,4 @@
-import { Body, Controller, Logger, Post, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Param, Post, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { PollsService } from './polls.service';
 import { CreatePollDto } from './dto/create-polls.dto';
 import { JoinPollDto } from './dto/join-polls.dto';
@@ -16,6 +16,13 @@ export class PollsController {
   create(@Body() createpolldto: CreatePollDto) {
     return this.pollsService.create(createpolldto)
   }
+
+  @Get(':pollId')
+  sendnominies(@Param('pollId')pollId:string){
+      return this.pollsService.sendnominee(pollId)
+  }
+
+
   @Post('/add')
   Add(@Body() createnomineedto: createnominee) {
     return this.pollsService.addnominee(createnomineedto)

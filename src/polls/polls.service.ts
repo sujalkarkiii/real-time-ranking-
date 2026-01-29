@@ -13,11 +13,21 @@ export class PollsService {
         private readonly jwtservice: JwtService) { }
 
 
+    async sendnominee(pollID:string) {
+        return await this.pollsrepo.sendnominee(pollID)
+    }
 
 
-        async addnominee(field:createnominee){
-            await this.pollsrepo.addnomines(field)
-        }
+
+    async addnominee(field: createnominee) {
+        await this.pollsrepo.addnomines(field)
+    }
+
+
+
+
+
+
 
     // this function is for creating the polls to vote//
 
@@ -66,7 +76,7 @@ export class PollsService {
             },
         )
         return {
-            userId:userId,
+            userId: userId,
             poll: joinedpoll,
             accessToken: signedString
         }
@@ -80,24 +90,24 @@ export class PollsService {
 
 
 
-  async removeParticipant(
-    pollID: string,
-    userID: string,
-  ): Promise<Poll | void> {
-    const poll = await this.pollsrepo.joinpoll(pollID);
+    async removeParticipant(
+        pollID: string,
+        userID: string,
+    ): Promise<Poll | void> {
+        const poll = await this.pollsrepo.joinpoll(pollID);
 
-    if (!poll.hasStarted) {
-      const updatedPoll = await this.pollsrepo.removeParticipant(
-        pollID,
-        userID,
-      );
-      return updatedPoll;
+        if (!poll.hasStarted) {
+            const updatedPoll = await this.pollsrepo.removeParticipant(
+                pollID,
+                userID,
+            );
+            return updatedPoll;
+        }
     }
-  }
 
-  async getPoll(pollID: string): Promise<Poll> {
-    return this.pollsrepo.joinpoll(pollID);
-  }
+    async getPoll(pollID: string): Promise<Poll> {
+        return this.pollsrepo.joinpoll(pollID);
+    }
 
 
 
@@ -131,9 +141,9 @@ export class PollsService {
 
     async computeResults(pollID: string): Promise<Poll> {
 
-                const get_result=await this.pollsrepo.getresult(pollID)
-                this.logger.log(get_result)
-                return get_result
+        const get_result = await this.pollsrepo.getresult(pollID)
+        this.logger.log(get_result)
+        return get_result
 
     }
 

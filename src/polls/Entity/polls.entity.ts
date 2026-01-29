@@ -9,6 +9,6 @@ export class polls{
     pollId:string
 
 
-    @Column()
-    nominees: string
+    @Column('simple-array')
+    nominees: string[]
 }{}
