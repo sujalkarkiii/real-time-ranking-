@@ -4,19 +4,22 @@ import { CreatePollDto } from './dto/create-polls.dto';
 import { JoinPollDto } from './dto/join-polls.dto';
 import { ControllerAuthGuard } from './controller-auth.guard';
 import type { RequestWithAuth } from './types';
+import { createnominee } from './dto/add-nominee.dto';
 
 
 @UsePipes(new ValidationPipe())
 @Controller('/polls')
 export class PollsController {
   constructor(private readonly pollsService: PollsService) { }
+  
   @Post()
   create(@Body() createpolldto: CreatePollDto) {
     return this.pollsService.create(createpolldto)
   }
-
-
-
+  @Post('/add')
+  Add(@Body() createnomineedto: createnominee) {
+    return this.pollsService.addnominee(createnomineedto)
+  }
   
   @Post('/join')
   join(@Body() joinpolldto: JoinPollDto) {

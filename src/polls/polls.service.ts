@@ -4,6 +4,7 @@ import { AddParticipantData, CreatePollFields, JoinPollFields, RejoinPollFields,
 import { pollsRepository } from './polls.repository';
 import { createPollID, createUserID } from 'src/ids';
 import { Poll } from 'shared/polls-types';
+import { createnominee } from './dto/add-nominee.dto';
 
 @Injectable()
 export class PollsService {
@@ -11,6 +12,12 @@ export class PollsService {
     constructor(private readonly pollsrepo: pollsRepository,
         private readonly jwtservice: JwtService) { }
 
+
+
+
+        async addnominee(field:createnominee){
+            await this.pollsrepo.addnomines(field)
+        }
 
     // this function is for creating the polls to vote//
 

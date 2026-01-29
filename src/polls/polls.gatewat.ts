@@ -94,7 +94,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
   @SubscribeMessage('stop-poll')
   async result(
-    @MessageBody() data: { nomination: string },
+    // @MessageBody() data: { nomination: string },
     @ConnectedSocket() client: any,
   ): Promise<void> {
     const updatedpoll = await this.pollsService.computeResults(client.pollID)

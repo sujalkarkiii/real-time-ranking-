@@ -1,21 +1,24 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
+import { BadGatewayException, BadRequestException, Inject, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import Redis from "ioredis";
 import { IORedisKey } from "src/redis.module";
 import { AddParticipantData, AddParticipantRankingsData, CreatePollData } from "./types";
 import { Poll } from "shared/polls-types";
-import { promises } from "dns";
-
+import { polls } from "./Entity/polls.entity";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { CreatePollDto } from "./dto/create-polls.dto";
+import { createnominee } from "./dto/add-nominee.dto";
 
 @Injectable()
 export class pollsRepository {
     private readonly ttl: string;
     private readonly logger = new Logger(pollsRepository.name);
 
-
     constructor(
         configservice: ConfigService,
-        @Inject(IORedisKey) private readonly redisClient: Redis
+        @Inject(IORedisKey) private readonly redisClient: Redis,
+        @InjectRepository(polls) private pollsrepo:Repository<polls>
     ) {
         this.ttl = configservice.get('POLL_DURATION', '3600');
     }
@@ -238,18 +241,39 @@ export class pollsRepository {
                 poll.rankings[ele] = (poll.rankings[ele] || 0) + 1;
             });
 
-            
+
             await this.redisClient.del(key)
             return poll
 
 
 
 
-        } catch(e) {
+        } catch (e) {
             this.logger.error(`Failed to get result for poll ${pollID}`, e.stack);
             throw new InternalServerErrorException(`Error getting poll result`);
         }
     }
+
+
+    async addnomines(check:createnominee) {
+
+        try {
+            const {pollId,name}=check
+                const poll = this.pollsrepo.create({pollId:pollId,nominees:name})
+               return this.pollsrepo.save(poll);
+
+        } catch (error) {
+            this.logger.error('failed to input to the database')
+            throw new BadGatewayException('Error on database conneciton')
+        }
+    }
+
+
+
+
+
+
+
 
 }
 
