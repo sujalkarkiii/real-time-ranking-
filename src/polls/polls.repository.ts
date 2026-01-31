@@ -7,8 +7,7 @@ import { Poll } from "shared/polls-types";
 import { polls } from "./Entity/polls.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { CreatePollDto } from "./dto/create-polls.dto";
-import { createnominee } from "./dto/add-nominee.dto";
+import { createnominee, savenominee } from "./dto/add-nominee.dto";
 
 @Injectable()
 export class pollsRepository {
@@ -255,13 +254,21 @@ export class pollsRepository {
     }
 
 
-    async addnomines(check: createnominee) {
-
+    async addnomines(check: savenominee) {
+        let nominees = []
         try {
             const { pollId, name } = check
-            const poll = this.pollsrepo.create({ pollId: pollId, nominees: [name] })
-            const savedPoll = this.pollsrepo.save(poll)
-            await this.redisClient.set(`poll:${pollId}123`, JSON.stringify(savedPoll));
+            const key = `polls:${pollId}`
+            const existingPoll = await this.redisClient.get(key)
+            if (!existingPoll) {
+                throw new NotFoundException('Poll not found')
+            }
+                const poll = JSON.parse(existingPoll)
+            poll.nominations = [...poll.nominations, ...name]
+             await this.redisClient.set(key, JSON.stringify(poll))
+            return poll
+
+
 
         } catch (error) {
             this.logger.error('failed to input to the database')
@@ -270,7 +277,7 @@ export class pollsRepository {
     }
 
     async sendnominee(pollID: string) {
-        const redisKey = `poll:${pollID}123`
+        const redisKey = `polls:${pollID}`
         const raw = await this.redisClient.get(redisKey)
         if (!raw) {
             return { nominees: [] };

@@ -12,27 +12,34 @@ import { createnominee } from './dto/add-nominee.dto';
 export class PollsController {
   constructor(private readonly pollsService: PollsService) { }
   
+  
+  // for creating  the poll by admin
   @Post()
   create(@Body() createpolldto: CreatePollDto) {
     return this.pollsService.create(createpolldto)
   }
 
+  // for sending Nominee back to frontend 
   @Get(':pollId')
   sendnominies(@Param('pollId')pollId:string){
+    console.log(pollId)
       return this.pollsService.sendnominee(pollId)
   }
 
-
+// For adding nominee by admin
   @Post('/add')
   Add(@Body() createnomineedto: createnominee) {
+  console.log(createnomineedto)    
     return this.pollsService.addnominee(createnomineedto)
   }
   
+  // contoller for users to join poll
   @Post('/join')
   join(@Body() joinpolldto: JoinPollDto) {
     return this.pollsService.join(joinpolldto)
   }
   
+  // not necessary used this is for rejoinng just for learning 
   @UseGuards(ControllerAuthGuard)
   @Post('/rejoin')
   rejoin(@Req() request: RequestWithAuth) {
