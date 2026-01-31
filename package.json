@@ -35,7 +35,7 @@
     "ioredis": "^5.9.2",
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.16.2",
-    "nanoid": "^5.1.6",
+    "nanoid": "^3.3.11",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "socket.io": "^4.8.3",
@@ -44,7 +44,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
-    "@nestjs/cli": "^11.0.0",
+    "@nestjs/cli": "^11.0.16",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
     "@types/express": "^5.0.0",

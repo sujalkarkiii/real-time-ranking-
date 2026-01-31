@@ -11,9 +11,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
      type: 'mysql',
       host: 'localhost',
       port: 3306,
-      username: 'root',
-      password: 'root',
-      database: 'test',
+      username: 'appuser',
+      password: 'apppassword',
+   
       entities: [],
       synchronize: true,
   }),ConfigModule.forRoot(),PollsModule,RedisModule],
