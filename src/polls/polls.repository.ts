@@ -8,6 +8,7 @@ import { polls } from "./Entity/polls.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { createnominee, savenominee } from "./dto/add-nominee.dto";
+import { Nominee } from "shared/nominee-types";
 
 @Injectable()
 export class pollsRepository {
@@ -277,19 +278,26 @@ export class pollsRepository {
     }
 
     async sendnominee(pollID: string) {
+
         const redisKey = `polls:${pollID}`
-        const raw = await this.redisClient.get(redisKey)
-        if (!raw) {
-            return { nominees: [] };
-        }
+        this.logger.log(redisKey)
 
-        const poll = JSON.parse(raw);
+            try {
+                 const raw = await this.redisClient.get(redisKey)
+            if (!raw) {
+                return { nominees: [] };
+            }
+            const poll = JSON.parse(raw);
+            
+            return { nominees: poll.nominations || [] };
+            } catch (error) {
+                 this.logger.error('Failed to fetch nominees from Redis', error);
+            throw new BadGatewayException('Error fetching poll data');
+            }
 
-        return { nominees: poll.nominees || [] };
-    } catch(error) {
-        this.logger.error('Failed to fetch nominees from Redis', error);
-        throw new BadGatewayException('Error fetching poll data');
+
     }
+
 
 
 

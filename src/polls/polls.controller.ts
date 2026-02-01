@@ -21,15 +21,16 @@ export class PollsController {
 
   // for sending Nominee back to frontend 
   @Get(':pollId')
-  sendnominies(@Param('pollId')pollId:string){
+  async sendnominies(@Param('pollId')pollId:string){
     console.log(pollId)
-      return this.pollsService.sendnominee(pollId)
+    const remote= await this.pollsService.sendnominee(pollId)
+    console.log(remote)
+      return remote
   }
 
 // For adding nominee by admin
   @Post('/add')
   Add(@Body() createnomineedto: createnominee) {
-  console.log(createnomineedto)    
     return this.pollsService.addnominee(createnomineedto)
   }
   

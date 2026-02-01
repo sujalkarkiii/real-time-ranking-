@@ -14,7 +14,8 @@ export class PollsService {
 
 
     async sendnominee(pollID:string) {
-        return await this.pollsrepo.sendnominee(pollID)
+        const remote=await this.pollsrepo.sendnominee(pollID)
+        return remote
     }
 
 
