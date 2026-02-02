@@ -1,4 +1,4 @@
-import { BadGatewayException, BadRequestException, Inject, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
+import { BadGatewayException, BadRequestException, ConflictException, Inject, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import Redis from "ioredis";
 import { IORedisKey } from "src/redis.module";
@@ -90,6 +90,7 @@ export class pollsRepository {
         nomination,
         name
     }: AddParticipantRankingsData): Promise<Poll> {
+
         this.logger.log(
             `Attempting to add rankings for userID: ${userID} to pollID: ${pollID}`,
             nomination,
@@ -97,39 +98,49 @@ export class pollsRepository {
 
         const key = `polls:${pollID}`;
 
-        try {
+try {
+    const currentPollString = await this.redisClient.get(key);
+    if (!currentPollString) {
+        throw new NotFoundException(`Poll with ID ${pollID} not found`);
+    }
 
-            const currentPollString = await this.redisClient.get(key);
+    const poll: Poll = JSON.parse(currentPollString);
 
-            if (!currentPollString) {
-                throw new NotFoundException(`Poll with ID ${pollID} not found`);
-            }
-            const poll: Poll = JSON.parse(currentPollString as string);
+    if (!poll.hasStarted) {
+        throw new BadRequestException('Poll has not started yet');
+    }
 
-            if (poll.hasStarted == false) {
-                throw new BadRequestException('Participants cannot rank until the poll has started')
-            }
+    if (poll.participants[userID] !== undefined) {
+        throw new ConflictException(`User ${userID} already joined`);
+    }
 
+    poll.participants[userID] = name;
+    poll.nominations = poll.nominations || [];
+    poll.nominations.push(nomination);
 
-            if (poll.participants[userID]) {
-                throw new BadRequestException(`User ${userID} has already joined the poll`);
-            } else {
-                poll.participants[userID] = name;
-            }
-            poll.nominations.push(nomination)
+    await this.redisClient.set(key, JSON.stringify(poll));
+    return poll;
 
-            await this.redisClient.set(key, JSON.stringify(poll));
+} catch (e) {
+    // Rethrow known HTTP exceptions
+    if (
+        e instanceof BadRequestException ||
+        e instanceof NotFoundException ||
+        e instanceof ConflictException
+    ) {
+        throw e;
+    }
 
-            return poll;
-        } catch (e) {
-            this.logger.error(
-                `Failed to add rankings for userID: ${userID} in pollID: ${pollID}`,
-                e.stack,
-            );
-            throw new InternalServerErrorException(
-                'There was an error saving participant rankings',
-            );
-        }
+    // Only wrap unexpected errors
+    this.logger.error(
+        `Failed to add rankings for userID: ${userID} in pollID: ${pollID}`,
+        e.stack || e.message,
+    );
+    throw new InternalServerErrorException(
+        'There was an error saving participant rankings',
+    );
+}
+
     }
 
 
@@ -264,9 +275,9 @@ export class pollsRepository {
             if (!existingPoll) {
                 throw new NotFoundException('Poll not found')
             }
-                const poll = JSON.parse(existingPoll)
+            const poll = JSON.parse(existingPoll)
             poll.nominations = [...poll.nominations, ...name]
-             await this.redisClient.set(key, JSON.stringify(poll))
+            await this.redisClient.set(key, JSON.stringify(poll))
             return poll
 
 
@@ -277,23 +288,23 @@ export class pollsRepository {
         }
     }
 
-    async sendnominee(pollID: string) {
+    async sendnominee(pollID: string): Promise<Nominee> {
 
         const redisKey = `polls:${pollID}`
         this.logger.log(redisKey)
 
-            try {
-                 const raw = await this.redisClient.get(redisKey)
+        try {
+            const raw = await this.redisClient.get(redisKey)
             if (!raw) {
                 return { nominees: [] };
             }
             const poll = JSON.parse(raw);
-            
+
             return { nominees: poll.nominations || [] };
-            } catch (error) {
-                 this.logger.error('Failed to fetch nominees from Redis', error);
+        } catch (error) {
+            this.logger.error('Failed to fetch nominees from Redis', error);
             throw new BadGatewayException('Error fetching poll data');
-            }
+        }
 
 
     }

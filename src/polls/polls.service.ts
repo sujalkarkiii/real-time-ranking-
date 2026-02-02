@@ -110,15 +110,6 @@ export class PollsService {
         return this.pollsrepo.joinpoll(pollID);
     }
 
-
-
-
-
-
-
-
-
-
     async rejoinPoll(fields: RejoinPollFields) {
         const joinedPoll = await this.pollsrepo.addparticipent(fields);
         return joinedPoll

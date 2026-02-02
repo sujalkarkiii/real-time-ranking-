@@ -18,8 +18,10 @@ export class websocketguard implements CanActivate {
             client.userID = payload.sub;
             client.pollID = payload.pollID;
             client.name = payload.name;
-            return true;
+            console.log("I am here in websocket")
+            return true
         } catch {
+            console.log("I am here in websocket")
             throw new ForbiddenException('Invalid authorization token');
         }
 

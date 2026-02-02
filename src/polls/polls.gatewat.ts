@@ -7,14 +7,14 @@ import { websocketguard } from "src/websocket-auth-guard";
 
 
 
+@UseGuards(websocketguard)
 @WebSocketGateway({
   namespace: '/polls/join',
   cors: {
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173','http://localhost:5174'],
     credentials: true,
   },
 })
-@UseGuards(websocketguard)
 export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
   logger = new Logger(WebsocketGateway.name)
@@ -33,8 +33,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     this.logger.log(`Disconnected socket id: ${client.id}`)
 
   }
-
-
+  
   @SubscribeMessage('join')
   async handleJoin(@ConnectedSocket() client: any) {
     const roomName = client.pollID;
@@ -59,16 +58,10 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
   async startpoll(@ConnectedSocket() client): Promise<void> {
 
     const updatedPoll = await this.pollsService.startpoll(client.pollID);
+    console.log(client.pollID)
+    console.log("pol has started")
     this.io.to(client.pollID).emit("poll-started", updatedPoll)
-
   }
-
-
-  //  pollID,
-  //   userID,
-  //   nomination,
-  //   name
-
 
   @SubscribeMessage('vote')
   async vote(
@@ -76,21 +69,18 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @ConnectedSocket() client: any,
   ): Promise<void> {
     const updatedpoll = await this.pollsService.castvote({
-
+      
       name: client.name,
       userID: client.userID,
       pollID: client.pollID,
       nomination: data.nomination
+      
     }
-    )
-    // vote==ranking== kaslai vote deko a userley jo login garxa tesley
+  )
 
-    this.io.to(client.pollID).emit("Vote ", updatedpoll);
+
+    this.io.to(client.pollID).emit("Vote", updatedpoll);
   }
-
-
-
-
 
   @SubscribeMessage('stop-poll')
   async result(
