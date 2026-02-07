@@ -22,6 +22,7 @@ export type Poll = {
     adminID: string;
     nominations: Nominations;
     rankings: Rankings;
+    to_vote:string[]
     results: Results;
     hasStarted: boolean;
 }

@@ -1,4 +1,4 @@
 export type Nominee=
 {
-    nominees:string[]
+    to_vote:string[]
 }

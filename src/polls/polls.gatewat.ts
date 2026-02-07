@@ -88,7 +88,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @ConnectedSocket() client: any,
   ): Promise<void> {
     const updatedpoll = await this.pollsService.computeResults(client.pollID)
-    this.io.to(client.pollID).emit("Result", updatedpoll.results)
+    this.io.to(client.pollID).emit("Result", updatedpoll.rankings)
 
   }
 
